@@ -2,60 +2,54 @@
 using System.Collections.Generic;
 using System.Linq;
 
-
-namespace _06.TruckTour
+namespace _06._Truck_Tour
 {
-    class TruckTour
+    class Program
     {
-        static void Main()
+        static void Main(string[] args)
         {
-            int n = int.Parse(Console.ReadLine());
+            int count = int.Parse(Console.ReadLine());
+            long fuel = 0;
+            var queue = new Queue<long[]>();
 
-            Queue<Tuple<int, int, int>> pumps = new Queue<Tuple<int, int, int>>();
 
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < count; i++)
             {
-                var numbers = Console.ReadLine().Split(' ').Select(int.Parse).ToArray();
-                int gas = numbers[0];
-                int distance = numbers[1];
-                int index = i;
-
-                pumps.Enqueue(new Tuple<int, int, int>(gas, distance, i));
+                queue.Enqueue(Console.ReadLine().Split().Select(long.Parse).ToArray());
             }
 
-            bool found = false;
-
-            while (true)
+            for (int i = 0; i < count; i++)
             {
-                long totalGas = 0;
-                Tuple<int, int, int> startPump = pumps.Dequeue();
-                int startIndex = startPump.Item3;
-                totalGas += startPump.Item1;
-                totalGas -= startPump.Item2;
-                pumps.Enqueue(startPump);
+                var current = queue.Peek();
+                bool isFuelEnough = true;
 
-                while (totalGas >= 0)
+                for (int j = 0; j < queue.Count; j++)
                 {
-                    startPump = pumps.Dequeue();
-                    totalGas += startPump.Item1;
-                    totalGas -= startPump.Item2;
-                    int currentIndex = startPump.Item3;
+                    fuel += current[0];
 
-                    if (currentIndex == startIndex)
+                    if (fuel < current[1])
                     {
-                        if (totalGas >= 0)
+                        isFuelEnough = false;
+
+                        for (int k = queue.Count - j + 1; k > 0; k--)
                         {
-                            Console.WriteLine(startIndex);
-                            return;
+                            queue.Enqueue(queue.Dequeue());
                         }
-                        else
-                        {
-                            return;
-                        }
+                        break;
                     }
 
-                    pumps.Enqueue(startPump);
+                    fuel -= current[1];
+                    queue.Enqueue(queue.Dequeue());
+                    current = queue.Peek();
                 }
+
+                if (isFuelEnough)
+                {
+                    Console.WriteLine(i);
+                    return;
+                }
+
+                fuel = 0;
             }
         }
     }
